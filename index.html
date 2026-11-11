@@ -7,10 +7,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Fox News">
-<title>Fox News Channel</title>
-<link rel="icon" href="Bakwaas.png">
-<link rel="apple-touch-icon" href="Bakwaas.png">
+<meta name="apple-mobile-web-app-title" content="Demo News">
+<title>Demo News Channel</title>
+<link rel="icon" href="Bakwaas.jpeg">
+<link rel="apple-touch-icon" href="Bakwaas.jpeg">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
 <style>
 /* Layout: app shell (fixed header with logo left and menu right, bottom tab bar on phones), live weather crawl, lead story desk, section walls, state-by-state weather board, footer. */
@@ -375,17 +375,17 @@ footer .wordmark{color:var(--on-band);margin-bottom:10px;font-size:26px}
 <body class="locked">
 
 <div id="splash" aria-hidden="true">
-  <img class="js-logo" src="bakwaas.jpeg" alt="" hidden>
-  <span class="wordmark"><span>FOX</span><em>News</em></span>
+  <img class="js-logo" src="Bakwaas.jpeg" alt="" hidden>
+  <span class="wordmark"><span>Demo</span><em>News</em></span>
 </div>
 
-<div class="strip"><div class="wrap"><span id="today"></span><span><b></b> ·</span></div></div>
+<div class="strip"><div class="wrap"><span id="today"></span><span><b>DEMO</b> · Not a real news service</span></div></div>
 
 <header class="top">
   <div class="wrap mast">
     <a class="logo" href="#home" aria-label="Demo News home">
-      <img class="js-logo" src="Bakwaas.png" alt="Demo News" hidden>
-      <span class="wordmark"><span>fox</span><em>News</em></span>
+      <img class="js-logo" src="Bakwaas.jpeg" alt="Demo News" hidden>
+      <span class="wordmark"><span>Demo</span><em>News</em></span>
     </a>
     <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="drawer">Menu<i></i></button>
   </div>
@@ -474,7 +474,7 @@ footer .wordmark{color:var(--on-band);margin-bottom:10px;font-size:26px}
 <footer><div class="wrap">
   <div>
     <a class="logo" href="#home" aria-label="Demo News home">
-      <img class="js-logo" src="bakwaas.jpeg" alt="Demo News" hidden>
+      <img class="js-logo" src="Bakwaas.jpeg" alt="Demo News" hidden>
       <span class="wordmark"><span>Demo</span><em>News</em></span>
     </a>
     <p>Demo News is a demo channel. Its video headlines are invented and are not real reporting.</p>
@@ -517,14 +517,14 @@ var THUMBS = {"business1": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2
 </script>
 <script>
 /* ================== EDIT HERE ==================
-   Your videos. Put the files in a "videos" folder next to this page.
+   Your videos. Put the files next to this page (same folder as index.html).
    date: YYYY-MM-DD (used for the date buttons inside Politics) */
 var VIDEOS = [
-  { title: "Video 1", file: "videos/video1.mp4", category: "Politics", date: "2026-11-11" },
-  { title: "Video 2", file: "videos/video2.mp4", category: "Politics", date: "2026-11-11" },
-  { title: "Video 3", file: "videos/video3.mp4", category: "Politics", date: "2026-11-10" },
-  { title: "Video 4", file: "videos/video4.mp4", category: "Politics", date: "2026-11-09" },
-  { title: "Video 5", file: "videos/video5.mp4", category: "Politics", date: "2026-11-09" }
+  { title: "Video 1", file: "Video1.MP4", category: "Politics", date: "2026-11-11" },
+  { title: "Video 2", file: "Video2.MP4", category: "Politics", date: "2026-11-11" },
+  { title: "Video 3", file: "Video3.MP4", category: "Politics", date: "2026-11-10" },
+  { title: "Video 4", file: "Video4.MP4", category: "Politics", date: "2026-11-09" },
+  { title: "Video 5", file: "Video5.MP4", category: "Politics", date: "2026-11-09" }
 ];
 /* Demo stories: thumbnails only. Clicking one shows a loading spinner. */
 var DEMO_STORIES = [
@@ -586,7 +586,7 @@ var playable=videos.filter(function(v){return!v.demo});
 /* GitHub is strict about file names, so each video is also looked for under common spellings. */
 playable.forEach(function(v){
   var m=/(\d+)\.\w+$/.exec(v.file),out=[v.file];
-  if(m)["videos/","Videos/",""].forEach(function(d){["video","Video","video ","Video ","video_","video-"].forEach(function(nm){["mp4","MP4","Mp4","mov","MOV","Mov","m4v","webm"].forEach(function(x){var c=d+nm+m[1]+"."+x;if(out.indexOf(c)<0)out.push(c)})})});
+  if(m)["","videos/","Videos/"].forEach(function(d){["Video","video","Video ","video ","video_","video-"].forEach(function(nm){["MP4","mp4","Mp4","mov","MOV","Mov","m4v","webm"].forEach(function(x){var c=d+nm+m[1]+"."+x;if(out.indexOf(c)<0)out.push(c)})})});
   v.cands=out;v.ci=0;v.first=v.file;
 });
 function vidFail(el){
@@ -611,7 +611,7 @@ document.addEventListener("wheel",function(e){if(e.ctrlKey)e.preventDefault()},{
 Array.prototype.forEach.call(document.querySelectorAll(".js-logo"),function(img){
   function ok(){if(!img.naturalWidth)return;img.hidden=false;var w=img.parentNode.querySelector(".wordmark");if(w)w.hidden=true}
   img.addEventListener("load",ok);
-  var names=["bakwaas.jpeg","bakwaas.jpg","Bakwaas.jpeg","Bakwaas.jpg","bakwaas.JPEG","bakwaas.JPG","bakwas.jpeg","bakwas.jpg","bakwaas.png","bakwas.png","Bakwaas.png","logo.png"],at=0;
+  var names=["Bakwaas.jpeg","bakwaas.jpeg","Bakwaas.png","bakwaas.png","Bakwaas.jpg","bakwaas.jpg","bakwas.jpeg","bakwas.jpg","bakwas.png","logo.png"],at=0;
   function next(){at++;if(at<names.length)img.src=names[at]}
   img.addEventListener("error",next);
   if(img.complete){if(img.naturalWidth)ok();else next()}
