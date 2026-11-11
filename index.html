@@ -587,7 +587,8 @@ var playable=videos.filter(function(v){return!v.demo});
 /* Find each video's real file name by asking the server (GitHub is strict about capitals).
    A thumbnail that fails to load never changes which file the player uses. */
 var HTTP=/^https?:$/.test(location.protocol);
-function head(u){return fetch(u,{method:"HEAD",cache:"no-store"}).then(function(r){return r.ok},function(){return null})}
+var CT={};
+function head(u){return fetch(u,{method:"HEAD",cache:"no-store"}).then(function(r){if(r.ok)CT[u]=r.headers.get("content-type")||"none";return r.ok},function(){return null})}
 function findFirst(list){
   var i=0;
   function next(){
@@ -611,11 +612,11 @@ playable.forEach(function(v){
     });
   }).catch(function(){});
 });
-function showMissing(v){
+function showMissing(v,code){
   var m=$("missing");if(!m)return;
-  $("miss-t").textContent=v.exists===false?"Video not uploaded yet":(v.exists?"This video can't play here":"Video can't be played");
-  $("miss-s").textContent=v.exists===false?"Add this file to the site:":(v.exists?"The file was found, but this browser can't play its format. Convert it to MP4 (H.264 video, AAC audio):":"The file is missing or its format isn't supported:");
-  $("miss-c").textContent=v.exists===false?v.first:v.file;
+  $("miss-t").textContent=v.exists===false?"Video not uploaded yet":(v.exists?"This video would not play":"Video can't be played");
+  $("miss-s").textContent=v.exists===false?"Add this file to the site:":(v.exists?"The file was found on the site, but this browser refused to play it.":"The file is missing or would not play:");
+  $("miss-c").textContent=(v.exists===false?v.first:v.file)+(v.exists?" · server type: "+(CT[v.file]||"unknown")+" · error "+(code||0)+(v.blobTried?" · retried":""):"");
   m.hidden=false;
 }
 /* Thumbnails: one video at a time, a single frame copied to a picture, then the video is released. */
@@ -646,7 +647,7 @@ function pump(){
       done();
     });
     el.addEventListener("error",done);
-    el.src=v.file;
+    el.src=v.blobUrl||v.file;
   });
 }
 setTimeout(function(){playable.forEach(function(v){pq.push(v)});pump()},1200);
@@ -709,10 +710,24 @@ document.addEventListener("error",function(e){
   var t=e.target;if(!t||!t.tagName||!t.parentNode)return;
   if(t.id==="vid"){
     var v=byId(+t.getAttribute("data-vid"));if(!v)return;
+    var code=t.error?t.error.code:0;
     (v.ready||Promise.resolve()).then(function(){
       if($("vid")!==t)return;
-      if(t.getAttribute("src")!==v.file){t.src=v.file;return}
-      showMissing(v);
+      var want=v.blobUrl||v.file;
+      if(t.getAttribute("src")!==want){t.src=want;return}
+      /* Second try: download the file and hand it to the player directly, which gets around a server that labels the file wrongly. */
+      if(HTTP&&v.exists!==false&&!v.blobTried){
+        v.blobTried=true;
+        $("miss-t").textContent="Loading video";$("miss-s").textContent="One moment.";$("miss-c").textContent=v.file;$("missing").hidden=false;
+        fetch(v.file).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){
+          var ty=/\.webm$/i.test(v.file)?"video/webm":(/\.mov$/i.test(v.file)?"video/quicktime":"video/mp4");
+          v.blobUrl=URL.createObjectURL(new Blob([b],{type:ty}));
+          if($("vid")===t){$("missing").hidden=true;t.src=v.blobUrl}
+          if(!v.poster){pq.push(v);pump()}
+        }).catch(function(){if($("vid")===t)showMissing(v,code)});
+        return;
+      }
+      showMissing(v,code);
     });
     return;
   }
@@ -808,7 +823,7 @@ function renderPlayer(){
   if(!v){el.innerHTML='<div class="meta">No videos added yet.</div>';return}
   var screen=v.demo
     ?'<div class="screen">'+pic(v)+'<div class="buffer" role="status" aria-label="Loading video"><div class="spin"></div></div><span class="bug">DEMO</span></div>'
-    :'<div class="screen"><video id="vid" controls playsinline preload="metadata" data-vid="'+v.id+'" src="'+esc(v.file)+'"></video><span class="bug">DEMO</span><div class="missing" id="missing" hidden><b id="miss-t"></b><span id="miss-s"></span><code id="miss-c"></code></div></div>';
+    :'<div class="screen"><video id="vid" controls playsinline preload="metadata" data-vid="'+v.id+'" src="'+esc(v.blobUrl||v.file)+'"></video><span class="bug">DEMO</span><div class="missing" id="missing" hidden><b id="miss-t"></b><span id="miss-s"></span><code id="miss-c"></code></div></div>';
   el.innerHTML=screen+'<div class="chyron"><span class="cat">'+esc(v.category)+"</span><h1>"+esc(v.title)+"</h1></div>"+
     '<div class="meta">'+(v.label?'<span class="lab">'+esc(v.label)+"</span>":"")+"<span>"+esc(dayName(v.date))+"</span><span>Demo News</span><button class=\"share\" id=\"save\">"+(saved.indexOf(v.id)>=0?"Saved":"Save")+"</button><button class=\"share\" id=\"share\">Share</button></div>";
   $("save").addEventListener("click",function(){var i=saved.indexOf(v.id);if(i>=0)saved.splice(i,1);else saved.push(v.id);try{localStorage.setItem("dn-saved",JSON.stringify(saved))}catch(e){}this.textContent=saved.indexOf(v.id)>=0?"Saved":"Save";toast(saved.indexOf(v.id)>=0?"Saved to your list":"Removed from saved");renderLists()});
