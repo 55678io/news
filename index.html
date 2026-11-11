@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Demo News">
 <title>Demo News Channel</title>
-<link rel="icon" href="bakwaas.png">
-<link rel="apple-touch-icon" href="bakwaas.png">
+<link rel="icon" href="bakwaas.jpeg">
+<link rel="apple-touch-icon" href="bakwaas.jpeg">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
 <style>
 /* Layout: app shell (fixed header with logo left and menu right, bottom tab bar on phones), live weather crawl, lead story desk, section walls, state-by-state weather board, footer. */
@@ -258,7 +258,7 @@ footer .wordmark{color:var(--on-band);margin-bottom:10px;font-size:26px}
 <body class="locked">
 
 <div id="splash" aria-hidden="true">
-  <img class="js-logo" src="bakwaas.png" alt="" hidden>
+  <img class="js-logo" src="bakwaas.jpeg" alt="" hidden>
   <span class="wordmark"><span>Demo</span><em>News</em></span>
 </div>
 
@@ -267,7 +267,7 @@ footer .wordmark{color:var(--on-band);margin-bottom:10px;font-size:26px}
 <header class="top">
   <div class="wrap mast">
     <a class="logo" href="#home" aria-label="Demo News home">
-      <img class="js-logo" src="bakwaas.png" alt="Demo News" hidden>
+      <img class="js-logo" src="bakwaas.jpeg" alt="Demo News" hidden>
       <span class="wordmark"><span>Demo</span><em>News</em></span>
     </a>
     <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="drawer">Menu<i></i></button>
@@ -330,7 +330,7 @@ footer .wordmark{color:var(--on-band);margin-bottom:10px;font-size:26px}
 <footer><div class="wrap">
   <div>
     <a class="logo" href="#home" aria-label="Demo News home">
-      <img class="js-logo" src="bakwaas.png" alt="Demo News" hidden>
+      <img class="js-logo" src="bakwaas.jpeg" alt="Demo News" hidden>
       <span class="wordmark"><span>Demo</span><em>News</em></span>
     </a>
     <p>Demo News is a demo channel. Its video headlines are invented and are not real reporting.</p>
@@ -462,7 +462,7 @@ document.addEventListener("wheel",function(e){if(e.ctrlKey)e.preventDefault()},{
 Array.prototype.forEach.call(document.querySelectorAll(".js-logo"),function(img){
   function ok(){if(!img.naturalWidth)return;img.hidden=false;var w=img.parentNode.querySelector(".wordmark");if(w)w.hidden=true}
   img.addEventListener("load",ok);
-  var names=["bakwaas.png","bakwas.png","Bakwaas.png","Bakwas.png","bakwaas.PNG","bakwas.PNG","bakwaas.jpg","bakwas.jpg","bakwaas.jpeg","logo.png"],at=0;
+  var names=["bakwaas.jpeg","bakwaas.jpg","Bakwaas.jpeg","Bakwaas.jpg","bakwaas.JPEG","bakwaas.JPG","bakwas.jpeg","bakwas.jpg","bakwaas.png","bakwas.png","Bakwaas.png","logo.png"],at=0;
   function next(){at++;if(at<names.length)img.src=names[at]}
   img.addEventListener("error",next);
   if(img.complete){if(img.naturalWidth)ok();else next()}
