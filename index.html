@@ -584,20 +584,72 @@ var videos=VIDEOS.map(function(v,i){return{id:i,n:i+1,title:String(v.title||"Vid
   .concat(DEMO_STORIES.map(function(v,i){return{id:1000+i,n:i,demo:true,title:String(v.title||""),file:"",category:CATS.indexOf(v.category)>=0?v.category:"World",date:String(v.date||""),label:"Demo",secs:74+(i*37)%160}}))
   .sort(function(a,b){return a.date===b.date?a.id-b.id:(a.date<b.date?1:-1)});
 var playable=videos.filter(function(v){return!v.demo});
-/* GitHub is strict about file names, so each video is also looked for under common spellings. */
-playable.forEach(function(v){
-  var m=/(\d+)\.\w+$/.exec(v.file),out=[v.file];
-  if(m)["","videos/","Videos/"].forEach(function(d){["Video","video","Video ","video ","video_","video-"].forEach(function(nm){["MP4","mp4","Mp4","mov","MOV","Mov","m4v","webm"].forEach(function(x){var c=d+nm+m[1]+"."+x;if(out.indexOf(c)<0)out.push(c)})})});
-  v.cands=out;v.ci=0;v.first=v.file;
-});
-function vidFail(el){
-  var v=byId(+el.getAttribute("data-vid"));if(!v||!v.cands)return false;
-  if(+el.getAttribute("data-ci")!==v.ci)return true;
-  if(v.ci>=v.cands.length-1)return false;
-  v.ci++;v.file=v.cands[v.ci];
-  Array.prototype.forEach.call(document.querySelectorAll('video[data-vid="'+v.id+'"]'),function(x){x.setAttribute("data-ci",v.ci);x.hidden=false;x.src=x.id==="vid"?v.file:v.file+"#t=0.5"});
-  return true;
+/* Find each video's real file name by asking the server (GitHub is strict about capitals).
+   A thumbnail that fails to load never changes which file the player uses. */
+var HTTP=/^https?:$/.test(location.protocol);
+function head(u){return fetch(u,{method:"HEAD",cache:"no-store"}).then(function(r){return r.ok},function(){return null})}
+function findFirst(list){
+  var i=0;
+  function next(){
+    if(i>=list.length)return Promise.resolve(null);
+    var part=list.slice(i,i+8);i+=8;
+    return Promise.all(part.map(head)).then(function(rs){for(var k=0;k<rs.length;k++)if(rs[k])return part[k];return next()});
+  }
+  return next();
 }
+playable.forEach(function(v){
+  var m=/(\d+)\.\w+$/.exec(v.file),out=[];
+  if(m)["","videos/","Videos/"].forEach(function(d){["Video","video","Video ","video ","video_","video-"].forEach(function(nm){["MP4","mp4","Mp4","mov","MOV","Mov","m4v","webm"].forEach(function(x){var c=d+nm+m[1]+"."+x;if(c!==v.file)out.push(c)})})});
+  v.first=v.file;v.exists=null;
+  v.ready=!HTTP?Promise.resolve():head(v.file).then(function(ok){
+    if(ok===null)return;
+    if(ok){v.exists=true;return}
+    return findFirst(out).then(function(f){
+      if(!f){v.exists=false;return}
+      v.file=f;v.exists=true;
+      var el=$("vid");if(el&&+el.getAttribute("data-vid")===v.id){$("missing").hidden=true;el.src=v.file}
+    });
+  }).catch(function(){});
+});
+function showMissing(v){
+  var m=$("missing");if(!m)return;
+  $("miss-t").textContent=v.exists===false?"Video not uploaded yet":(v.exists?"This video can't play here":"Video can't be played");
+  $("miss-s").textContent=v.exists===false?"Add this file to the site:":(v.exists?"The file was found, but this browser can't play its format. Convert it to MP4 (H.264 video, AAC audio):":"The file is missing or its format isn't supported:");
+  $("miss-c").textContent=v.exists===false?v.first:v.file;
+  m.hidden=false;
+}
+/* Thumbnails: one video at a time, a single frame copied to a picture, then the video is released. */
+var pq=[],pBusy=false;
+function paint(v){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-poster="'+v.id+'"]'),function(b){
+    var im=b.querySelector("img"),d=b.querySelector(".dur");
+    if(im&&v.poster){im.src=v.poster;im.hidden=false}
+    if(d&&v.dur)d.textContent=clock(v.dur);
+  });
+}
+function pump(){
+  if(pBusy||!pq.length)return;pBusy=true;var v=pq.shift();
+  v.ready.then(function(){
+    var el=document.createElement("video"),fin=false,t=setTimeout(done,9000);
+    function done(){
+      if(fin)return;fin=true;clearTimeout(t);
+      try{el.removeAttribute("src");el.load()}catch(e){}
+      paint(v);pBusy=false;setTimeout(pump,150);
+    }
+    if(v.exists===false){done();return}
+    el.muted=true;el.playsInline=true;el.preload="metadata";
+    el.addEventListener("loadedmetadata",function(){if(isFinite(el.duration)){v.dur=el.duration;paint(v)}try{el.currentTime=Math.min(.5,(el.duration||1)/2)}catch(e){done()}});
+    el.addEventListener("seeked",function(){
+      try{var c=document.createElement("canvas");c.width=320;c.height=180;
+        var vw=el.videoWidth||16,vh=el.videoHeight||9,k=Math.max(320/vw,180/vh);
+        c.getContext("2d").drawImage(el,(320-vw*k)/2,(180-vh*k)/2,vw*k,vh*k);v.poster=c.toDataURL("image/jpeg",.7)}catch(e){}
+      done();
+    });
+    el.addEventListener("error",done);
+    el.src=v.file;
+  });
+}
+setTimeout(function(){playable.forEach(function(v){pq.push(v)});pump()},1200);
 var current=playable.length?playable[0].id:null,cat="all",sub=null,q="",autoplay=false,shown=null;
 var saved=[];
 try{saved=(JSON.parse(localStorage.getItem("dn-saved")||"[]")||[]).filter(function(x){return typeof x==="number"})}catch(e){saved=[]}
@@ -651,13 +703,17 @@ function artSvg(v){
 function pic(v){var k=slug(v.category)+(v.n%4+1);return artSvg(v)+'<img alt="" src="'+(THUMBS[k]||"thumbs/"+k+".jpg")+'">'}
 function thumb(v){
   if(v.demo)return'<div class="thumb">'+pic(v)+'<span class="dur">'+clock(v.secs)+"</span></div>";
-  return'<div class="thumb">'+pad(v.n)+'<video muted playsinline preload="metadata" tabindex="-1" data-vid="'+v.id+'" data-ci="'+v.ci+'" src="'+esc(v.file)+'#t=0.5"></video><span class="dur"></span></div>';
+  return'<div class="thumb" data-poster="'+v.id+'">'+pad(v.n)+'<img alt=""'+(v.poster?' src="'+v.poster+'"':" hidden")+'><span class="dur">'+(v.dur?clock(v.dur):"")+"</span></div>";
 }
 document.addEventListener("error",function(e){
   var t=e.target;if(!t||!t.tagName||!t.parentNode)return;
-  if(t.tagName==="VIDEO"&&t.hasAttribute("data-vid")){
-    if(vidFail(t))return;
-    if(t.id==="vid"){var m=$("missing");if(m)m.hidden=false}else t.hidden=true;
+  if(t.id==="vid"){
+    var v=byId(+t.getAttribute("data-vid"));if(!v)return;
+    (v.ready||Promise.resolve()).then(function(){
+      if($("vid")!==t)return;
+      if(t.getAttribute("src")!==v.file){t.src=v.file;return}
+      showMissing(v);
+    });
     return;
   }
   if(t.tagName==="IMG"&&/thumb|screen/.test(t.parentNode.className))t.hidden=true;
@@ -752,7 +808,7 @@ function renderPlayer(){
   if(!v){el.innerHTML='<div class="meta">No videos added yet.</div>';return}
   var screen=v.demo
     ?'<div class="screen">'+pic(v)+'<div class="buffer" role="status" aria-label="Loading video"><div class="spin"></div></div><span class="bug">DEMO</span></div>'
-    :'<div class="screen"><video id="vid" controls playsinline preload="metadata" data-vid="'+v.id+'" data-ci="'+v.ci+'" src="'+esc(v.file)+'"></video><span class="bug">DEMO</span><div class="missing" id="missing" hidden><b>Video not uploaded yet</b><span>Add this file to the site:</span><code>'+esc(v.first||v.file)+"</code></div></div>";
+    :'<div class="screen"><video id="vid" controls playsinline preload="metadata" data-vid="'+v.id+'" src="'+esc(v.file)+'"></video><span class="bug">DEMO</span><div class="missing" id="missing" hidden><b id="miss-t"></b><span id="miss-s"></span><code id="miss-c"></code></div></div>';
   el.innerHTML=screen+'<div class="chyron"><span class="cat">'+esc(v.category)+"</span><h1>"+esc(v.title)+"</h1></div>"+
     '<div class="meta">'+(v.label?'<span class="lab">'+esc(v.label)+"</span>":"")+"<span>"+esc(dayName(v.date))+"</span><span>Demo News</span><button class=\"share\" id=\"save\">"+(saved.indexOf(v.id)>=0?"Saved":"Save")+"</button><button class=\"share\" id=\"share\">Share</button></div>";
   $("save").addEventListener("click",function(){var i=saved.indexOf(v.id);if(i>=0)saved.splice(i,1);else saved.push(v.id);try{localStorage.setItem("dn-saved",JSON.stringify(saved))}catch(e){}this.textContent=saved.indexOf(v.id)>=0?"Saved":"Save";toast(saved.indexOf(v.id)>=0?"Saved to your list":"Removed from saved");renderLists()});
