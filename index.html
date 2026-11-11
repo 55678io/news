@@ -7,10 +7,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Demo News">
-<title>Demo News Channel</title>
-<link rel="icon" href="Bakwaas.jpeg">
-<link rel="apple-touch-icon" href="Bakwaas.jpeg">
+<meta name="apple-mobile-web-app-title" content="Fox News">
+<title>Fox News Channel</title>
+<link rel="icon" href="Bakwaas.png">
+<link rel="apple-touch-icon" href="Bakwaas.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
 <style>
 /* Layout: app shell (fixed header with logo left and menu right, bottom tab bar on phones), live weather crawl, lead story desk, section walls, state-by-state weather board, footer. */
@@ -375,17 +375,17 @@ footer .wordmark{color:var(--on-band);margin-bottom:10px;font-size:26px}
 <body class="locked">
 
 <div id="splash" aria-hidden="true">
-  <img class="js-logo" src="Bakwaas.jpeg" alt="" hidden>
-  <span class="wordmark"><span>Demo</span><em>News</em></span>
+  <img class="js-logo" src="Bakwaas.png" alt="" hidden>
+  <span class="wordmark"><span>fox</span><em>News</em></span>
 </div>
 
-<div class="strip"><div class="wrap"><span id="today"></span><span><b>DEMO</b> · Not a real news service</span></div></div>
+<div class="strip"><div class="wrap"><span id="today"></span><span><b></b></span></div></div>
 
 <header class="top">
   <div class="wrap mast">
-    <a class="logo" href="#home" aria-label="Demo News home">
-      <img class="js-logo" src="Bakwaas.jpeg" alt="Demo News" hidden>
-      <span class="wordmark"><span>Demo</span><em>News</em></span>
+    <a class="logo" href="#home" aria-label="Fox News home">
+      <img class="js-logo" src="Bakwaas.png" alt="Fox News" hidden>
+      <span class="wordmark"><span>fox</span><em>News</em></span>
     </a>
     <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="drawer">Menu<i></i></button>
   </div>
@@ -399,7 +399,7 @@ footer .wordmark{color:var(--on-band);margin-bottom:10px;font-size:26px}
   <div id="drawer-nav"></div>
   <button class="theme" id="theme">Appearance: Auto</button>
   <button class="theme" id="tsize">Text size: Normal</button>
-  <p>Demo News is a demo channel.</p>
+  <p>fox news channel inc.</p>
 </aside>
 
 <div class="brk" id="brk" hidden><div class="wrap"><b>Alert</b><a href="#weather" id="brk-t"></a><button id="brk-x" aria-label="Dismiss alert">×</button></div></div>
@@ -424,7 +424,7 @@ footer .wordmark{color:var(--on-band);margin-bottom:10px;font-size:26px}
     <div class="rail" id="shows-rail"></div>
   </section>
   <section id="markets">
-    <h2 class="sec"><span>Markets</span><small><i class="livedot"></i>Simulated demo market · not real prices</small></h2>
+    <h2 class="sec"><span>Markets</span><small><i class="livedot"></i>stock market ·</small></h2>
     <div class="tape" aria-hidden="true"><div id="tape"></div></div>
     <div class="idx" id="idx"></div>
     <h3 class="mini">Top movers</h3>
@@ -474,10 +474,10 @@ footer .wordmark{color:var(--on-band);margin-bottom:10px;font-size:26px}
 <footer><div class="wrap">
   <div>
     <a class="logo" href="#home" aria-label="Demo News home">
-      <img class="js-logo" src="Bakwaas.jpeg" alt="Demo News" hidden>
+      <img class="js-logo" src="Bakwaas.png" alt="fox News" hidden>
       <span class="wordmark"><span>Demo</span><em>News</em></span>
     </a>
-    <p>Demo News is a demo channel. Its video headlines are invented and are not real reporting.</p>
+    <p>"We Report, You Decide"  I"Real News. Real Honest Opinion." (Introduced 2018): A tagline introduced in promotional campaigns to emphasize the network's blend of news reporting and prime-time commentary..</p>
   </div>
   <div><h3>Sections</h3><div id="foot-nav"></div></div>
   <div><h3>Weather data</h3><p>Live alerts from the U.S. National Weather Service. Current conditions for each state capital from Open-Meteo.</p><p>© <span id="year"></span> Demo News</p></div>
@@ -525,9 +525,10 @@ var VIDEOS = [
   { title: "Video 3", file: "Video3.MP4", category: "Politics", date: "2026-11-10" },
   { title: "Video 4", file: "Video4.MP4", category: "Politics", date: "2026-11-09" },
   { title: "Video 5", file: "Video5.MP4", category: "Politics", date: "2026-11-09" }
+  { title: "Video 6", file: "Video6.MP4", category: "Politics", date: "2026-11-09" }
 ];
-/* Demo stories: thumbnails only. Clicking one shows a loading spinner. */
-var DEMO_STORIES = [
+/* fox stories: thumbnails only. Clicking one shows a loading spinner. */
+var fox_STORIES = [
   { title: "Small-town diner runs out of pancakes, declares emergency", category: "World", date: "2026-11-11" },
   { title: "School bus takes the scenic route, kids cheer", category: "World", date: "2026-11-10" },
   { title: "Squirrel shuts down neighborhood barbecue", category: "World", date: "2026-11-09" },
